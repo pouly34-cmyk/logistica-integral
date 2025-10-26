@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es-ES">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Navegación Admin</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .test-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      .success {
+        background: #d4edda;
+        border-color: #c3e6cb;
+      }
+      .error {
+        background: #f8d7da;
+        border-color: #f5c6cb;
+      }
+      .warning {
+        background: #fff3cd;
+        border-color: #ffeaa7;
+      }
+      button {
+        margin: 5px;
+        padding: 10px 15px;
+        cursor: pointer;
+      }
+      .log {
+        background: #f8f9fa;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 3px;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧪 Test de Navegación del Panel Admin</h1>
+
+    <div class="test-section">
+      <h3>📋 Verificación de Funciones Globales</h3>
+      <button onclick="verificarFuncionesGlobales()">
+        🔍 Verificar Funciones
+      </button>
+      <div id="funcionesResult" class="log"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>🧭 Test de Navegación</h3>
+      <button onclick="testNavegacion()">🧪 Test Navegación</button>
+      <div id="navegacionResult" class="log"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>🔧 Test de Elementos DOM</h3>
+      <button onclick="testElementosDOM()">🔍 Verificar DOM</button>
+      <div id="domResult" class="log"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>📊 Test de Datos</h3>
+      <button onclick="testDatos()">📈 Verificar Datos</button>
+      <div id="datosResult" class="log"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>🚀 Abrir Panel Admin</h3>
+      <button onclick="abrirAdmin()">🏠 Ir a Admin</button>
+    </div>
+
+    <script>
+      function log(elementId, message, type = "info") {
+        const element = document.getElementById(elementId);
+        const timestamp = new Date().toLocaleTimeString();
+        const icon =
+          type === "error"
+            ? "❌"
+            : type === "success"
+            ? "✅"
+            : type === "warning"
+            ? "⚠️"
+            : "ℹ️";
+        element.innerHTML += `[${timestamp}] ${icon} ${message}<br>`;
+      }
+
+      function verificarFuncionesGlobales() {
+        const result = document.getElementById("funcionesResult");
+        result.innerHTML = "";
+
+        log(
+          "funcionesResult",
+          "Iniciando verificación de funciones globales..."
+        );
+
+        // Cargar admin-script.js si no está cargado
+        if (typeof mostrarSeccion === "undefined") {
+          log("funcionesResult", "Cargando admin-script.js...", "warning");
+          const script = document.createElement("script");
+          script.src = "admin-script.js";
+          script.onload = function () {
+            log("funcionesResult", "admin-script.js cargado", "success");
+            setTimeout(verificarFuncionesInternas, 1000);
+          };
+          script.onerror = function () {
+            log("funcionesResult", "Error cargando admin-script.js", "error");
+          };
+          document.head.appendChild(script);
+        } else {
+          verificarFuncionesInternas();
+        }
+      }
+
+      function verificarFuncionesInternas() {
+        const funciones = [
+          "mostrarSeccion",
+          "configurarNavegacion",
+          "inicializarAdmin",
+          "cargarDatos",
+          "configurarUI",
+          "actualizarNavActiva",
+          "generarReporte",
+          "initializeReportesSection",
+        ];
+
+        funciones.forEach((func) => {
+          if (typeof window[func] === "function") {
+            log("funcionesResult", `Función ${func}: DISPONIBLE`, "success");
+          } else {
+            log("funcionesResult", `Función ${func}: NO ENCONTRADA`, "error");
+          }
+        });
+
+        // Verificar variables globales
+        const variables = ["enviosData", "currentUser", "isInitialized"];
+        variables.forEach((variable) => {
+          if (typeof window[variable] !== "undefined") {
+            log(
+              "funcionesResult",
+              `Variable ${variable}: ${typeof window[
+                variable
+              ]} = ${JSON.stringify(window[variable])}`,
+              "success"
+            );
+          } else {
+            log(
+              "funcionesResult",
+              `Variable ${variable}: NO DEFINIDA`,
+              "warning"
+            );
+          }
+        });
+      }
+
+      function testNavegacion() {
+        const result = document.getElementById("navegacionResult");
+        result.innerHTML = "";
+
+        log("navegacionResult", "Iniciando test de navegación...");
+
+        if (typeof mostrarSeccion === "function") {
+          try {
+            log(
+              "navegacionResult",
+              'Probando mostrarSeccion("dashboard")...',
+              "info"
+            );
+            mostrarSeccion("dashboard");
+            log(
+              "navegacionResult",
+              "mostrarSeccion ejecutada sin errores",
+              "success"
+            );
+          } catch (error) {
+            log(
+              "navegacionResult",
+              `Error en mostrarSeccion: ${error.message}`,
+              "error"
+            );
+          }
+        } else {
+          log(
+            "navegacionResult",
+            "Función mostrarSeccion no disponible",
+            "error"
+          );
+        }
+
+        if (typeof configurarNavegacion === "function") {
+          try {
+            log(
+              "navegacionResult",
+              "Probando configurarNavegacion()...",
+              "info"
+            );
+            configurarNavegacion();
+            log(
+              "navegacionResult",
+              "configurarNavegacion ejecutada sin errores",
+              "success"
+            );
+          } catch (error) {
+            log(
+              "navegacionResult",
+              `Error en configurarNavegacion: ${error.message}`,
+              "error"
+            );
+          }
+        } else {
+          log(
+            "navegacionResult",
+            "Función configurarNavegacion no disponible",
+            "error"
+          );
+        }
+      }
+
+      function testElementosDOM() {
+        const result = document.getElementById("domResult");
+        result.innerHTML = "";
+
+        log("domResult", "Verificando elementos DOM del admin...");
+
+        // Simular elementos que deberían existir en admin.html
+        const elementos = [
+          ".nav-item",
+          "#dashboard-section",
+          "#envios-section",
+          "#reportes-section",
+          "#clientes-section",
+          "#repartidores-section",
+        ];
+
+        elementos.forEach((selector) => {
+          const elementos = document.querySelectorAll(selector);
+          if (elementos.length > 0) {
+            log(
+              "domResult",
+              `${selector}: ${elementos.length} elementos encontrados`,
+              "success"
+            );
+          } else {
+            log(
+              "domResult",
+              `${selector}: NO ENCONTRADO (normal en esta página de test)`,
+              "warning"
+            );
+          }
+        });
+      }
+
+      function testDatos() {
+        const result = document.getElementById("datosResult");
+        result.innerHTML = "";
+
+        log("datosResult", "Verificando datos en localStorage...");
+
+        const keys = [
+          "enviosLogistica",
+          "clientesData",
+          "repartidoresData",
+          "adminUser",
+        ];
+        keys.forEach((key) => {
+          const data = localStorage.getItem(key);
+          if (data) {
+            try {
+              const parsed = JSON.parse(data);
+              if (Array.isArray(parsed)) {
+                log(
+                  "datosResult",
+                  `${key}: ${parsed.length} elementos`,
+                  "success"
+                );
+              } else {
+                log(
+                  "datosResult",
+                  `${key}: objeto con ${
+                    Object.keys(parsed).length
+                  } propiedades`,
+                  "success"
+                );
+              }
+            } catch (e) {
+              log(
+                "datosResult",
+                `${key}: ${data.length} caracteres (string)`,
+                "info"
+              );
+            }
+          } else {
+            log("datosResult", `${key}: NO ENCONTRADO`, "warning");
+          }
+        });
+      }
+
+      function abrirAdmin() {
+        window.open("admin.html", "_blank");
+      }
+
+      // Auto-ejecutar verificación al cargar
+      window.onload = function () {
+        log(
+          "funcionesResult",
+          "Página de test cargada. Haz clic en los botones para ejecutar las pruebas."
+        );
+      };
+    </script>
+  </body>
+</html>

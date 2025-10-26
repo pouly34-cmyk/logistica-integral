@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pruebas de Funcionalidad - Logistica Integral</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .test-container {
+        background: white;
+        padding: 20px;
+        margin: 10px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .test-title {
+        color: #333;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+      }
+      .test-result {
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .test-pass {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .test-fail {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .test-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+      }
+      .test-button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      .test-button:hover {
+        background-color: #0056b3;
+      }
+      .test-log {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 12px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧪 Pruebas de Funcionalidad - Sistema de Logistica</h1>
+
+    <div class="test-container">
+      <h2 class="test-title">📋 Resumen de Pruebas</h2>
+      <div id="test-summary">
+        <div class="test-info">Iniciando pruebas automatizadas...</div>
+      </div>
+      <button class="test-button" onclick="ejecutarTodasLasPruebas()">
+        🚀 Ejecutar Todas las Pruebas
+      </button>
+      <button class="test-button" onclick="limpiarResultados()">
+        🧹 Limpiar Resultados
+      </button>
+    </div>
+
+    <div class="test-container">
+      <h2 class="test-title">
+        🔍 Prueba 1: Verificacion de Archivos Principales
+      </h2>
+      <div id="test-archivos-results"></div>
+      <button class="test-button" onclick="probarArchivos()">
+        ▶️ Ejecutar Prueba
+      </button>
+    </div>
+
+    <div class="test-container">
+      <h2 class="test-title">📝 Prueba 2: Verificacion de Elementos DOM</h2>
+      <div id="test-dom-results"></div>
+      <button class="test-button" onclick="probarElementosDOM()">
+        ▶️ Ejecutar Prueba
+      </button>
+    </div>
+
+    <div class="test-container">
+      <h2 class="test-title">⚙️ Prueba 3: Funciones JavaScript</h2>
+      <div id="test-js-results"></div>
+      <button class="test-button" onclick="probarFuncionesJS()">
+        ▶️ Ejecutar Prueba
+      </button>
+    </div>
+
+    <div class="test-container">
+      <h2 class="test-title">💾 Prueba 4: LocalStorage y Datos</h2>
+      <div id="test-storage-results"></div>
+      <button class="test-button" onclick="probarLocalStorage()">
+        ▶️ Ejecutar Prueba
+      </button>
+    </div>
+
+    <div class="test-container">
+      <h2 class="test-title">🎨 Prueba 5: Estilos y CSS</h2>
+      <div id="test-css-results"></div>
+      <button class="test-button" onclick="probarEstilos()">
+        ▶️ Ejecutar Prueba
+      </button>
+    </div>
+
+    <div class="test-container">
+      <h2 class="test-title">📊 Prueba 6: Simulacion de Flujo Completo</h2>
+      <div id="test-flujo-results"></div>
+      <button class="test-button" onclick="probarFlujoCompleto()">
+        ▶️ Ejecutar Prueba
+      </button>
+    </div>
+
+    <div class="test-container">
+      <h2 class="test-title">📝 Log de Pruebas</h2>
+      <div id="test-log" class="test-log"></div>
+    </div>
+
+    <script>
+      // Variables globales para las pruebas
+      let testResults = {
+        archivos: 0,
+        dom: 0,
+        javascript: 0,
+        storage: 0,
+        css: 0,
+        flujo: 0,
+        total: 0,
+        passed: 0,
+        failed: 0,
+      };
+
+      // Función para logging
+      function log(message, type = "info") {
+        const logDiv = document.getElementById("test-log");
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+        logDiv.textContent += logEntry;
+        logDiv.scrollTop = logDiv.scrollHeight;
+        console.log(logEntry);
+      }
+
+      // Función para mostrar resultados
+      function mostrarResultado(containerId, message, passed) {
+        const container = document.getElementById(containerId);
+        const resultDiv = document.createElement("div");
+        resultDiv.className = passed
+          ? "test-result test-pass"
+          : "test-result test-fail";
+        resultDiv.textContent = (passed ? "✅ " : "❌ ") + message;
+        container.appendChild(resultDiv);
+
+        testResults.total++;
+        if (passed) {
+          testResults.passed++;
+        } else {
+          testResults.failed++;
+        }
+
+        actualizarResumen();
+      }
+
+      // Actualizar resumen
+      function actualizarResumen() {
+        const summaryDiv = document.getElementById("test-summary");
+        const percentage =
+          testResults.total > 0
+            ? Math.round((testResults.passed / testResults.total) * 100)
+            : 0;
+
+        summaryDiv.innerHTML = `
+                <div class="test-info">
+                    📊 Total: ${testResults.total} | ✅ Exitosas: ${testResults.passed} | ❌ Fallidas: ${testResults.failed} | 📈 Éxito: ${percentage}%
+                </div>
+            `;
+      }
+
+      // Prueba 1: Verificar archivos principales
+      function probarArchivos() {
+        log("Iniciando prueba de archivos principales");
+        const container = document.getElementById("test-archivos-results");
+        container.innerHTML = "";
+
+        // Verificar que los elementos principales existen
+        const archivosEsenciales = [
+          {
+            nombre: "index.html",
+            elemento: document.querySelector('link[href="style.css"]'),
+          },
+          {
+            nombre: "admin.html",
+            test: () => fetch("admin.html").then((r) => r.ok),
+          },
+          {
+            nombre: "script.js",
+            test: () => fetch("script.js").then((r) => r.ok),
+          },
+          {
+            nombre: "admin-script.js",
+            test: () => fetch("admin-script.js").then((r) => r.ok),
+          },
+        ];
+
+        // Verificar archivos CSS
+        const cssLinks = document.querySelectorAll('link[rel="stylesheet"]');
+        mostrarResultado(
+          "test-archivos-results",
+          `Archivos CSS encontrados: ${cssLinks.length}`,
+          cssLinks.length > 0
+        );
+
+        // Verificar archivos JS
+        const jsScripts = document.querySelectorAll("script[src]");
+        mostrarResultado(
+          "test-archivos-results",
+          `Archivos JavaScript encontrados: ${jsScripts.length}`,
+          jsScripts.length > 0
+        );
+
+        // Verificar estructura HTML básica
+        const hasTitle = document.title.length > 0;
+        mostrarResultado(
+          "test-archivos-results",
+          `Título de página definido: "${document.title}"`,
+          hasTitle
+        );
+
+        const hasCharset = document.querySelector("meta[charset]") !== null;
+        mostrarResultado(
+          "test-archivos-results",
+          "Codificación de caracteres definida",
+          hasCharset
+        );
+
+        log("Prueba de archivos completada");
+      }
+
+      // Prueba 2: Elementos DOM
+      function probarElementosDOM() {
+        log("Iniciando prueba de elementos DOM");
+        const container = document.getElementById("test-dom-results");
+        container.innerHTML = "";
+
+        // Elementos críticos que deben existir
+        const elementosCriticos = [
+          { selector: "header", nombre: "Header principal" },
+          { selector: "nav", nombre: "Navegación" },
+          { selector: "main", nombre: "Contenido principal" },
+          { selector: "footer", nombre: "Footer" },
+          { selector: ".hero-section", nombre: "Sección hero" },
+          { selector: "#servicios", nombre: "Sección servicios" },
+          { selector: "#seguimiento", nombre: "Sección seguimiento" },
+          { selector: "#contacto", nombre: "Sección contacto" },
+          { selector: "#cotizacionModal", nombre: "Modal de cotización" },
+          { selector: "#pagoModal", nombre: "Modal de pago" },
+        ];
+
+        elementosCriticos.forEach((elemento) => {
+          const existe = document.querySelector(elemento.selector) !== null;
+          mostrarResultado(
+            "test-dom-results",
+            `${elemento.nombre} existe`,
+            existe
+          );
+        });
+
+        // Verificar formularios
+        const formularios = document.querySelectorAll("form");
+        mostrarResultado(
+          "test-dom-results",
+          `Formularios encontrados: ${formularios.length}`,
+          formularios.length >= 2
+        );
+
+        // Verificar botones principales
+        const botones = document.querySelectorAll("button, .btn");
+        mostrarResultado(
+          "test-dom-results",
+          `Botones encontrados: ${botones.length}`,
+          botones.length > 5
+        );
+
+        log("Prueba de elementos DOM completada");
+      }
+
+      // Prueba 3: Funciones JavaScript
+      function probarFuncionesJS() {
+        log("Iniciando prueba de funciones JavaScript");
+        const container = document.getElementById("test-js-results");
+        container.innerHTML = "";
+
+        // Verificar funciones globales críticas
+        const funcionesCriticas = [
+          "calcularPrecio",
+          "calcularTipoEnvio",
+          "validarEmail",
+          "generarNumeroGuia",
+          "guardarEnvio",
+          "mostrarComprobante",
+        ];
+
+        funcionesCriticas.forEach((nombreFuncion) => {
+          const existe = typeof window[nombreFuncion] === "function";
+          mostrarResultado(
+            "test-js-results",
+            `Función ${nombreFuncion} definida`,
+            existe
+          );
+        });
+
+        // Probar función de cálculo de precio
+        try {
+          const datosPrueba = {
+            origenCiudad: "Ciudad de Mexico, CDMX",
+            destinoCiudad: "Puebla, Puebla",
+            tipoEnvio: "sobre",
+            peso: 0.5,
+            unidades: 1,
+            tipoServicio: "normal",
+          };
+
+          if (typeof calcularPrecio === "function") {
+            const precio = calcularPrecio(datosPrueba);
+            const precioValido = precio > 0 && precio < 1000;
+            mostrarResultado(
+              "test-js-results",
+              `Cálculo de precio funcional: $${precio}`,
+              precioValido
+            );
+          }
+        } catch (error) {
+          mostrarResultado(
+            "test-js-results",
+            `Error en cálculo de precio: ${error.message}`,
+            false
+          );
+        }
+
+        // Probar validación de email
+        try {
+          if (typeof validarEmail === "function") {
+            const emailValido = validarEmail("test@example.com");
+            const emailInvalido = !validarEmail("email-invalido");
+            mostrarResultado(
+              "test-js-results",
+              "Validación de email funcional",
+              emailValido && emailInvalido
+            );
+          }
+        } catch (error) {
+          mostrarResultado(
+            "test-js-results",
+            `Error en validación de email: ${error.message}`,
+            false
+          );
+        }
+
+        log("Prueba de funciones JavaScript completada");
+      }
+
+      // Prueba 4: LocalStorage
+      function probarLocalStorage() {
+        log("Iniciando prueba de LocalStorage");
+        const container = document.getElementById("test-storage-results");
+        container.innerHTML = "";
+
+        // Verificar disponibilidad de localStorage
+        const localStorageDisponible = typeof Storage !== "undefined";
+        mostrarResultado(
+          "test-storage-results",
+          "LocalStorage disponible",
+          localStorageDisponible
+        );
+
+        if (localStorageDisponible) {
+          // Probar escritura y lectura
+          try {
+            const testKey = "test_logistica_" + Date.now();
+            const testValue = { test: true, timestamp: Date.now() };
+
+            localStorage.setItem(testKey, JSON.stringify(testValue));
+            const retrieved = JSON.parse(localStorage.getItem(testKey));
+            const escrituraLectura = retrieved && retrieved.test === true;
+
+            localStorage.removeItem(testKey);
+            mostrarResultado(
+              "test-storage-results",
+              "Escritura/Lectura de localStorage",
+              escrituraLectura
+            );
+          } catch (error) {
+            mostrarResultado(
+              "test-storage-results",
+              `Error en localStorage: ${error.message}`,
+              false
+            );
+          }
+
+          // Verificar datos existentes
+          const enviosExistentes = localStorage.getItem("enviosLogistica");
+          const tieneEnvios = enviosExistentes !== null;
+          mostrarResultado(
+            "test-storage-results",
+            `Datos de envíos en localStorage: ${tieneEnvios ? "Sí" : "No"}`,
+            true
+          );
+
+          if (tieneEnvios) {
+            try {
+              const envios = JSON.parse(enviosExistentes);
+              const numEnvios = Array.isArray(envios) ? envios.length : 0;
+              mostrarResultado(
+                "test-storage-results",
+                `Número de envíos almacenados: ${numEnvios}`,
+                numEnvios >= 0
+              );
+            } catch (error) {
+              mostrarResultado(
+                "test-storage-results",
+                "Error parseando datos de envíos",
+                false
+              );
+            }
+          }
+        }
+
+        log("Prueba de LocalStorage completada");
+      }
+
+      // Prueba 5: Estilos CSS
+      function probarEstilos() {
+        log("Iniciando prueba de estilos CSS");
+        const container = document.getElementById("test-css-results");
+        container.innerHTML = "";
+
+        // Verificar que los estilos se están aplicando
+        const body = document.body;
+        const bodyStyles = window.getComputedStyle(body);
+
+        const tieneFontFamily = bodyStyles.fontFamily !== "initial";
+        mostrarResultado(
+          "test-css-results",
+          "Fuente CSS aplicada",
+          tieneFontFamily
+        );
+
+        // Verificar elementos con clases específicas
+        const elementosConEstilo = [
+          { selector: ".btn", propiedad: "cursor", valorEsperado: "pointer" },
+          { selector: ".modal", propiedad: "display", valorEsperado: "none" },
+          {
+            selector: ".hero-section",
+            propiedad: "display",
+            valorEsperado: "block",
+          },
+        ];
+
+        elementosConEstilo.forEach((elemento) => {
+          const el = document.querySelector(elemento.selector);
+          if (el) {
+            const styles = window.getComputedStyle(el);
+            const tieneEstilo = styles[elemento.propiedad] !== "initial";
+            mostrarResultado(
+              "test-css-results",
+              `Estilos aplicados a ${elemento.selector}`,
+              tieneEstilo
+            );
+          } else {
+            mostrarResultado(
+              "test-css-results",
+              `Elemento ${elemento.selector} no encontrado`,
+              false
+            );
+          }
+        });
+
+        // Verificar responsive design
+        const viewport = document.querySelector('meta[name="viewport"]');
+        const esResponsive = viewport !== null;
+        mostrarResultado(
+          "test-css-results",
+          "Configuración responsive",
+          esResponsive
+        );
+
+        log("Prueba de estilos CSS completada");
+      }
+
+      // Prueba 6: Flujo completo simulado
+      function probarFlujoCompleto() {
+        log("Iniciando prueba de flujo completo");
+        const container = document.getElementById("test-flujo-results");
+        container.innerHTML = "";
+
+        // Simular apertura de modal de cotización
+        try {
+          const modal = document.getElementById("cotizacionModal");
+          if (modal) {
+            // Simular click en botón de cotizar
+            const botonesServicio = document.querySelectorAll(".btn-servicio");
+            mostrarResultado(
+              "test-flujo-results",
+              `Botones de servicio encontrados: ${botonesServicio.length}`,
+              botonesServicio.length > 0
+            );
+
+            // Verificar campos del formulario
+            const camposFormulario = [
+              "origenCiudad",
+              "destinoCiudad",
+              "tipoEnvio",
+              "peso",
+              "tipoServicio",
+            ];
+
+            let camposEncontrados = 0;
+            camposFormulario.forEach((campo) => {
+              const elemento = document.getElementById(campo);
+              if (elemento) camposEncontrados++;
+            });
+
+            mostrarResultado(
+              "test-flujo-results",
+              `Campos de formulario: ${camposEncontrados}/${camposFormulario.length}`,
+              camposEncontrados === camposFormulario.length
+            );
+          }
+        } catch (error) {
+          mostrarResultado(
+            "test-flujo-results",
+            `Error en simulación de modal: ${error.message}`,
+            false
+          );
+        }
+
+        // Simular generación de número de guía
+        try {
+          if (typeof generarNumeroGuia === "function") {
+            const numeroGuia = generarNumeroGuia();
+            const formatoValido = /^LI-\d{4}-\d{6}$/.test(numeroGuia);
+            mostrarResultado(
+              "test-flujo-results",
+              `Número de guía generado: ${numeroGuia}`,
+              formatoValido
+            );
+          }
+        } catch (error) {
+          mostrarResultado(
+            "test-flujo-results",
+            `Error generando número de guía: ${error.message}`,
+            false
+          );
+        }
+
+        // Simular guardado de envío
+        try {
+          const envioTest = {
+            numeroGuia: "LI-2025-TEST001",
+            cliente: {
+              nombre: "Cliente Test",
+              telefono: "55-1234-5678",
+              email: "test@example.com",
+            },
+            origenCiudad: "Ciudad de Mexico",
+            destinoCiudad: "Puebla",
+            precio: 75,
+            fechaCreacion: new Date().toISOString(),
+          };
+
+          if (typeof guardarEnvio === "function") {
+            guardarEnvio(envioTest);
+
+            // Verificar que se guardó
+            const enviosGuardados = localStorage.getItem("enviosLogistica");
+            const seGuardo =
+              enviosGuardados && enviosGuardados.includes("LI-2025-TEST001");
+            mostrarResultado(
+              "test-flujo-results",
+              "Envío de prueba guardado correctamente",
+              seGuardo
+            );
+
+            // Limpiar datos de prueba
+            if (seGuardo) {
+              const envios = JSON.parse(enviosGuardados);
+              const enviosFiltrados = envios.filter(
+                (e) => e.numeroGuia !== "LI-2025-TEST001"
+              );
+              localStorage.setItem(
+                "enviosLogistica",
+                JSON.stringify(enviosFiltrados)
+              );
+            }
+          }
+        } catch (error) {
+          mostrarResultado(
+            "test-flujo-results",
+            `Error en guardado de envío: ${error.message}`,
+            false
+          );
+        }
+
+        log("Prueba de flujo completo completada");
+      }
+
+      // Ejecutar todas las pruebas
+      function ejecutarTodasLasPruebas() {
+        log("=== INICIANDO SUITE COMPLETA DE PRUEBAS ===");
+        limpiarResultados();
+
+        setTimeout(() => probarArchivos(), 100);
+        setTimeout(() => probarElementosDOM(), 500);
+        setTimeout(() => probarFuncionesJS(), 1000);
+        setTimeout(() => probarLocalStorage(), 1500);
+        setTimeout(() => probarEstilos(), 2000);
+        setTimeout(() => probarFlujoCompleto(), 2500);
+
+        setTimeout(() => {
+          log("=== SUITE DE PRUEBAS COMPLETADA ===");
+          const percentage =
+            testResults.total > 0
+              ? Math.round((testResults.passed / testResults.total) * 100)
+              : 0;
+          log(
+            `Resultado final: ${testResults.passed}/${testResults.total} pruebas exitosas (${percentage}%)`
+          );
+        }, 3000);
+      }
+
+      // Limpiar resultados
+      function limpiarResultados() {
+        const containers = [
+          "test-archivos-results",
+          "test-dom-results",
+          "test-js-results",
+          "test-storage-results",
+          "test-css-results",
+          "test-flujo-results",
+        ];
+
+        containers.forEach((id) => {
+          const container = document.getElementById(id);
+          if (container) container.innerHTML = "";
+        });
+
+        testResults = {
+          archivos: 0,
+          dom: 0,
+          javascript: 0,
+          storage: 0,
+          css: 0,
+          flujo: 0,
+          total: 0,
+          passed: 0,
+          failed: 0,
+        };
+
+        document.getElementById("test-log").textContent = "";
+        actualizarResumen();
+        log("Resultados de pruebas limpiados");
+      }
+
+      // Inicializar al cargar la página
+      window.addEventListener("load", function () {
+        log("Sistema de pruebas inicializado");
+        actualizarResumen();
+      });
+    </script>
+  </body>
+</html>

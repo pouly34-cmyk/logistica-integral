@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="es-ES">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Admin - Logistica Integral</title>
+    <link rel="stylesheet" href="admin-style.css" />
+  </head>
+  <body class="admin-panel">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2>🚚 Admin Panel</h2>
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-section="dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-section="envios">
+          <span class="nav-icon">📦</span>
+          <span class="nav-text">Gestion de Envios</span>
+        </a>
+        <a href="#" class="nav-item" data-section="clientes">
+          <span class="nav-icon">👥</span>
+          <span class="nav-text">Clientes</span>
+        </a>
+        <a href="#" class="nav-item" data-section="repartidores">
+          <span class="nav-icon">🚚</span>
+          <span class="nav-text">Repartidores</span>
+        </a>
+        <a href="#" class="nav-item" data-section="reportes">
+          <span class="nav-icon">📈</span>
+          <span class="nav-text">Reportes</span>
+        </a>
+        <a href="#" class="nav-item" data-section="configuracion">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-text">Configuracion</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="home-btn" id="homeBtn">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-text">Pagina Principal</span>
+        </button>
+        <button class="logout-btn" id="logoutBtn">
+          <span class="nav-icon">🚪</span>
+          <span class="nav-text">Cerrar Sesion</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+        <div class="header-right">
+          <div class="notifications">
+            <span class="notification-icon">🔔</span>
+            <span class="notification-count" id="notificationCount">0</span>
+          </div>
+          <div class="user-info">
+            <span class="user-name" id="userName">Admin</span>
+            <span class="user-role">Administrador</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <main class="content" id="mainContent">
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="content-section active">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">📦</div>
+              <div class="stat-info">
+                <h3 id="totalEnvios">0</h3>
+                <p>Total Envios</p>
+                <button
+                  onclick="crearDatosPrueba()"
+                  class="btn-secondary"
+                  style="margin-top: 10px; font-size: 12px"
+                >
+                  🧪 Crear Datos de Prueba
+                </button>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">🚚</div>
+              <div class="stat-info">
+                <h3 id="enviosHoy">0</h3>
+                <p>Envios Hoy</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">💰</div>
+              <div class="stat-info">
+                <h3 id="ingresosHoy">$0</h3>
+                <p>Ingresos Hoy</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">⏱️</div>
+              <div class="stat-info">
+                <h3 id="enviosPendientes">0</h3>
+                <p>Pendientes</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3>Envios Recientes</h3>
+                <button class="btn-secondary" onclick="showSection('envios')">
+                  Ver Todos
+                </button>
+              </div>
+              <div class="card-content">
+                <div class="table-container">
+                  <table class="data-table" id="recentEnviosTable">
+                    <thead>
+                      <tr>
+                        <th>Guia</th>
+                        <th>Cliente</th>
+                        <th>Origen → Destino</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recentEnviosBody">
+                      <tr>
+                        <td colspan="5" class="no-data">
+                          No hay envios recientes
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3>Estados de Envios</h3>
+              </div>
+              <div class="card-content">
+                <div class="status-chart">
+                  <div class="status-item">
+                    <div class="status-color status-pendiente"></div>
+                    <span
+                      >Pendientes:
+                      <strong id="statusPendientes">0</strong></span
+                    >
+                  </div>
+                  <div class="status-item">
+                    <div class="status-color status-transito"></div>
+                    <span
+                      >En Transito: <strong id="statusTransito">0</strong></span
+                    >
+                  </div>
+                  <div class="status-item">
+                    <div class="status-color status-entregado"></div>
+                    <span
+                      >Entregados:
+                      <strong id="statusEntregados">0</strong></span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Gestion de Envios Section -->
+        <section id="envios-section" class="content-section">
+          <div class="section-header">
+            <h2>Gestion de Envios</h2>
+            <div class="section-actions">
+              <input
+                type="text"
+                id="searchEnvios"
+                placeholder="Buscar por guia o cliente..."
+                class="search-input"
+              />
+              <select id="filterEstado" class="filter-select">
+                <option value="">Todos los estados</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="asignado">Asignado</option>
+                <option value="en_transito">En Transito</option>
+                <option value="entregado">Entregado</option>
+              </select>
+              <button
+                onclick="cargarTablaEnviosConAsignaciones()"
+                class="btn-secondary"
+                style="margin-left: 10px"
+              >
+                🔄 Actualizar
+              </button>
+              <button
+                onclick="asignacionAutomatica()"
+                class="btn-primary"
+                style="margin-left: 10px"
+              >
+                🎲 Asignacion Automatica
+              </button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table" id="enviosTable">
+              <thead>
+                <tr>
+                  <th>Guia</th>
+                  <th>Cliente</th>
+                  <th>Telefono</th>
+                  <th>Origen</th>
+                  <th>Destino</th>
+                  <th>Tipo</th>
+                  <th>Precio</th>
+                  <th>Estado</th>
+                  <th>Repartidor</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="enviosTableBody">
+                <tr>
+                  <td colspan="11" class="no-data">
+                    No hay envios registrados
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Otras secciones (placeholder) -->
+        <section id="clientes-section" class="content-section">
+          <div class="section-header">
+            <h2>Gestion de Clientes</h2>
+            <div class="section-actions">
+              <input
+                type="text"
+                id="searchClientes"
+                placeholder="Buscar por nombre o telefono..."
+                class="search-input"
+              />
+              <select id="filterTipoCliente" class="filter-select">
+                <option value="">Todos los clientes</option>
+                <option value="frecuente">
+                  Clientes Frecuentes (3+ envios)
+                </option>
+                <option value="nuevo">Clientes Nuevos (1-2 envios)</option>
+                <option value="inactivo">
+                  Clientes Inactivos (sin envios recientes)
+                </option>
+              </select>
+              <button
+                onclick="actualizacionRapidaClientes()"
+                class="btn-primary"
+                style="margin-left: 10px"
+              >
+                🔄 Actualizar Clientes
+              </button>
+
+              <button
+                onclick="mostrarOpcionesExportacion()"
+                class="btn-primary"
+                style="margin-left: 10px"
+              >
+                📊 Exportar
+              </button>
+            </div>
+          </div>
+
+          <div class="stats-clientes">
+            <div class="stat-card-small">
+              <div class="stat-icon">👥</div>
+              <div class="stat-info">
+                <h4 id="totalClientes">0</h4>
+                <p>Total Clientes</p>
+              </div>
+            </div>
+            <div class="stat-card-small">
+              <div class="stat-icon">🔥</div>
+              <div class="stat-info">
+                <h4 id="clientesFrecuentes">0</h4>
+                <p>Frecuentes</p>
+              </div>
+            </div>
+            <div class="stat-card-small">
+              <div class="stat-icon">🆕</div>
+              <div class="stat-info">
+                <h4 id="clientesNuevos">0</h4>
+                <p>Nuevos</p>
+              </div>
+            </div>
+            <div class="stat-card-small">
+              <div class="stat-icon">💰</div>
+              <div class="stat-info">
+                <h4 id="ingresosTotales">$0</h4>
+                <p>Ingresos Totales</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table" id="clientesTable">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Telefono</th>
+                  <th>Email</th>
+                  <th>Total Envios</th>
+                  <th>Ultimo Envio</th>
+                  <th>Total Gastado</th>
+                  <th>Tipo Cliente</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="clientesTableBody">
+                <tr>
+                  <td colspan="8" class="no-data">
+                    No hay clientes registrados
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="repartidores-section" class="content-section">
+          <div class="section-header">
+            <h2>Gestion de Repartidores</h2>
+            <div class="section-actions">
+              <input
+                type="text"
+                id="searchRepartidores"
+                placeholder="Buscar por nombre o ID..."
+                class="search-input"
+              />
+              <select id="filterEstadoRepartidor" class="filter-select">
+                <option value="">Todos los estados</option>
+                <option value="active">Activo</option>
+                <option value="inactive">Inactivo</option>
+                <option value="suspended">Suspendido</option>
+              </select>
+              <button class="btn-primary" id="addRepartidorBtn">
+                <span>➕</span> Agregar Repartidor
+              </button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table" id="repartidoresTable">
+              <thead>
+                <tr>
+                  <th>Numero ID</th>
+                  <th>Nombre Completo</th>
+                  <th>Tipo de Vehiculo</th>
+                  <th>Numero de Placa</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="repartidoresTableBody">
+                <tr>
+                  <td colspan="6" class="no-data">
+                    No hay repartidores registrados
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Seccion de Reportes -->
+        <section id="reportes-section" class="content-section">
+          <div class="section-header">
+            <h2>📈 Reportes y Analisis</h2>
+            <div class="section-actions">
+              <select id="periodoReporte" class="filter-select">
+                <option value="hoy">Hoy</option>
+                <option value="semana">Esta Semana</option>
+                <option value="mes" selected>Este Mes</option>
+                <option value="trimestre">Este Trimestre</option>
+                <option value="ano">Este Año</option>
+                <option value="personalizado">Periodo Personalizado</option>
+              </select>
+              <button
+                onclick="generarReporte()"
+                class="btn-primary"
+                style="margin-left: 10px"
+              >
+                📊 Generar Reporte
+              </button>
+              <button
+                onclick="exportarReporte()"
+                class="btn-secondary"
+                style="margin-left: 10px"
+              >
+                📄 Exportar JSON
+              </button>
+              <button
+                onclick="initializeReportesSection()"
+                class="btn-primary"
+                style="margin-left: 10px; background: #27ae60;"
+              >
+                🔄 Actualizar Datos
+              </button>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filtros Personalizados -->
+          <div
+            id="filtrosPersonalizados"
+            class="filtros-container"
+            style="display: none"
+          >
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fechaInicio">Fecha Inicio:</label>
+                <input type="date" id="fechaInicio" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label for="fechaFin">Fecha Fin:</label>
+                <input type="date" id="fechaFin" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label for="zonaFiltro">Zona:</label>
+                <select id="zonaFiltro" class="form-control">
+                  <option value="">Todas las zonas</option>
+                  <option value="cdmx">CDMX</option>
+                  <option value="puebla">Puebla</option>
+                  <option value="metropolitana">Metropolitana</option>
+                  <option value="rural">Rural</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPIs Principales -->
+          <div class="kpis-container">
+            <div class="kpi-card">
+              <div class="kpi-icon">📦</div>
+              <div class="kpi-content">
+                <h3 id="kpiTotalEnvios">0</h3>
+                <p>Total Envios</p>
+                <span class="kpi-change" id="kpiEnviosChange">+0%</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon">💰</div>
+              <div class="kpi-content">
+                <h3 id="kpiIngresos">$0</h3>
+                <p>Ingresos Totales</p>
+                <span class="kpi-change" id="kpiIngresosChange">+0%</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon">👥</div>
+              <div class="kpi-content">
+                <h3 id="kpiClientesNuevos">0</h3>
+                <p>Clientes Nuevos</p>
+                <span class="kpi-change" id="kpiClientesChange">+0%</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon">✅</div>
+              <div class="kpi-content">
+                <h3 id="kpiTasaEntrega">0%</h3>
+                <p>Tasa de Entrega</p>
+                <span class="kpi-change" id="kpiEntregaChange">+0%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Graficos y Tablas -->
+          <div class="reportes-grid">
+            <!-- Grafico de Envios por Tiempo -->
+            <div class="reporte-card">
+              <div class="card-header">
+                <h3>📈 Envios por Periodo</h3>
+                <select id="tipoGraficoEnvios" class="mini-select">
+                  <option value="lineas">Lineas</option>
+                  <option value="barras">Barras</option>
+                </select>
+              </div>
+              <div class="card-content">
+                <canvas id="graficoEnvios" width="400" height="200"></canvas>
+              </div>
+            </div>
+
+            <!-- Grafico de Ingresos -->
+            <div class="reporte-card">
+              <div class="card-header">
+                <h3>💰 Ingresos por Zona</h3>
+                <select id="tipoGraficoIngresos" class="mini-select">
+                  <option value="circular">Circular</option>
+                  <option value="barras">Barras</option>
+                </select>
+              </div>
+              <div class="card-content">
+                <canvas id="graficoIngresos" width="400" height="200"></canvas>
+              </div>
+            </div>
+
+            <!-- Estados de Envios -->
+            <div class="reporte-card">
+              <div class="card-header">
+                <h3>📊 Estados de Envios</h3>
+              </div>
+              <div class="card-content">
+                <canvas id="graficoEstados" width="400" height="200"></canvas>
+              </div>
+            </div>
+
+            <!-- Top Clientes -->
+            <div class="reporte-card">
+              <div class="card-header">
+                <h3>🏆 Top 10 Clientes</h3>
+                <button onclick="exportarTopClientes()" class="btn-mini">
+                  📊 Exportar
+                </button>
+              </div>
+              <div class="card-content">
+                <div class="table-container">
+                  <table class="mini-table" id="tablaTopClientes">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Envios</th>
+                        <th>Total ($)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="topClientesBody">
+                      <tr>
+                        <td colspan="4" class="no-data">Cargando datos...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rendimiento Repartidores -->
+            <div class="reporte-card">
+              <div class="card-header">
+                <h3>🚚 Rendimiento Repartidores</h3>
+                <button
+                  onclick="exportarRendimientoRepartidores()"
+                  class="btn-mini"
+                >
+                  📊 Exportar
+                </button>
+              </div>
+              <div class="card-content">
+                <div class="table-container">
+                  <table class="mini-table" id="tablaRepartidores">
+                    <thead>
+                      <tr>
+                        <th>Repartidor</th>
+                        <th>Envios</th>
+                        <th>Tasa Exito</th>
+                        <th>Tiempo Prom.</th>
+                      </tr>
+                    </thead>
+                    <tbody id="repartidoresBody">
+                      <tr>
+                        <td colspan="4" class="no-data">Cargando datos...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Analisis de Zonas -->
+            <div class="reporte-card">
+              <div class="card-header">
+                <h3>🗺️ Analisis por Zonas</h3>
+              </div>
+              <div class="card-content">
+                <div class="zonas-analisis">
+                  <div class="zona-item">
+                    <div class="zona-header">
+                      <span class="zona-nombre">CDMX</span>
+                      <span class="zona-porcentaje" id="zonaCDMXPorcentaje"
+                        >0%</span
+                      >
+                    </div>
+                    <div class="zona-barra">
+                      <div
+                        class="zona-progreso"
+                        id="zonaCDMXProgreso"
+                        style="width: 0%"
+                      ></div>
+                    </div>
+                    <div class="zona-stats">
+                      <span id="zonaCDMXEnvios">0 envios</span>
+                      <span id="zonaCDMXIngresos">$0</span>
+                    </div>
+                  </div>
+                  <div class="zona-item">
+                    <div class="zona-header">
+                      <span class="zona-nombre">Puebla</span>
+                      <span class="zona-porcentaje" id="zonaPueblaPorcentaje"
+                        >0%</span
+                      >
+                    </div>
+                    <div class="zona-barra">
+                      <div
+                        class="zona-progreso"
+                        id="zonaPueblaProgreso"
+                        style="width: 0%"
+                      ></div>
+                    </div>
+                    <div class="zona-stats">
+                      <span id="zonaPueblaEnvios">0 envios</span>
+                      <span id="zonaPueblaIngresos">$0</span>
+                    </div>
+                  </div>
+                  <div class="zona-item">
+                    <div class="zona-header">
+                      <span class="zona-nombre">Metropolitana</span>
+                      <span class="zona-porcentaje" id="zonaMetroPorcentaje"
+                        >0%</span
+                      >
+                    </div>
+                    <div class="zona-barra">
+                      <div
+                        class="zona-progreso"
+                        id="zonaMetroProgreso"
+                        style="width: 0%"
+                      ></div>
+                    </div>
+                    <div class="zona-stats">
+                      <span id="zonaMetroEnvios">0 envios</span>
+                      <span id="zonaMetroIngresos">$0</span>
+                    </div>
+                  </div>
+                  <div class="zona-item">
+                    <div class="zona-header">
+                      <span class="zona-nombre">Rural</span>
+                      <span class="zona-porcentaje" id="zonaRuralPorcentaje"
+                        >0%</span
+                      >
+                    </div>
+                    <div class="zona-barra">
+                      <div
+                        class="zona-progreso"
+                        id="zonaRuralProgreso"
+                        style="width: 0%"
+                      ></div>
+                    </div>
+                    <div class="zona-stats">
+                      <span id="zonaRuralEnvios">0 envios</span>
+                      <span id="zonaRuralIngresos">$0</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resumen Ejecutivo -->
+          <div class="resumen-ejecutivo">
+            <div class="card-header">
+              <h3>📋 Resumen Ejecutivo</h3>
+              <button onclick="generarResumenPDF()" class="btn-primary">
+                📄 Generar PDF
+              </button>
+            </div>
+            <div class="card-content">
+              <div id="resumenContenido">
+                <p>
+                  Selecciona un periodo y genera un reporte para ver el resumen
+                  ejecutivo.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="configuracion-section" class="content-section">
+          <h2>Configuracion del Sistema</h2>
+          <p>Funcionalidad en desarrollo...</p>
+        </section>
+      </main>
+    </div>
+
+    <!-- Modal para editar envio -->
+    <div id="editEnvioModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Editar Envio</h3>
+          <span class="close" id="closeEditModal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="editEnvioForm">
+            <div class="form-group">
+              <label for="editGuia">Numero de Guia:</label>
+              <input type="text" id="editGuia" readonly />
+            </div>
+            <div class="form-group">
+              <label for="editEstado">Estado:</label>
+              <select id="editEstado" required>
+                <option value="pendiente">Pendiente</option>
+                <option value="en_transito">En Tránsito</option>
+                <option value="entregado">Entregado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editNotas">Notas:</label>
+              <textarea
+                id="editNotas"
+                rows="3"
+                placeholder="Agregar notas sobre el envío..."
+              ></textarea>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn-secondary" id="cancelEdit">
+                Cancelar
+              </button>
+              <button type="submit" class="btn-primary">Guardar Cambios</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para agregar/editar repartidor -->
+    <div id="repartidorModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="repartidorModalTitle">Agregar Repartidor</h3>
+          <span class="close" id="closeRepartidorModal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="repartidorForm">
+            <div class="form-simple">
+              <div class="form-group">
+                <label for="repartidorNombre">Nombre *</label>
+                <input
+                  type="text"
+                  id="repartidorNombre"
+                  required
+                  placeholder="Ingrese el nombre"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="repartidorApellido">Apellido *</label>
+                <input
+                  type="text"
+                  id="repartidorApellido"
+                  required
+                  placeholder="Ingrese el apellido"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="repartidorEmpleadoId">Número ID *</label>
+                <input
+                  type="text"
+                  id="repartidorEmpleadoId"
+                  required
+                  placeholder="Se genera automáticamente"
+                  readonly
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="vehiculoTipo">Tipo de Vehículo Asignado *</label>
+                <select id="vehiculoTipo" required>
+                  <option value="">Seleccionar tipo de vehículo...</option>
+                  <option value="motorcycle">🏍️ Motocicleta</option>
+                  <option value="bicycle">🚲 Bicicleta</option>
+                  <option value="car">🚗 Automóvil</option>
+                  <option value="van">🚐 Camioneta</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="vehiculoPlacas"
+                  >Número de Placa del Vehículo *</label
+                >
+                <input
+                  type="text"
+                  id="vehiculoPlacas"
+                  required
+                  placeholder="Ej: ABC-123-XYZ"
+                  style="text-transform: uppercase"
+                />
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn-secondary" id="cancelRepartidor">
+                Cancelar
+              </button>
+              <button type="submit" class="btn-primary">
+                <span id="saveRepartidorText">Guardar Repartidor</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para ver detalles del repartidor -->
+    <div id="viewRepartidorModal" class="modal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3>Detalles del Repartidor</h3>
+          <span class="close" id="closeViewRepartidorModal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div id="repartidorDetails" class="details-grid">
+            <!-- Los detalles se llenarán dinámicamente -->
+          </div>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              id="closeViewRepartidor"
+            >
+              Cerrar
+            </button>
+            <button
+              type="button"
+              class="btn-primary"
+              id="editRepartidorFromView"
+            >
+              Editar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para asignar repartidor -->
+    <div id="asignarRepartidorModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Asignar Repartidor</h3>
+          <span class="close" id="closeAsignarModal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="asignarRepartidorForm">
+            <div class="envio-info">
+              <h4>Información del Envío</h4>
+              <div class="info-grid">
+                <div class="info-item">
+                  <strong>Guía:</strong> <span id="asignarGuia">-</span>
+                </div>
+                <div class="info-item">
+                  <strong>Cliente:</strong> <span id="asignarCliente">-</span>
+                </div>
+                <div class="info-item">
+                  <strong>Origen:</strong> <span id="asignarOrigen">-</span>
+                </div>
+                <div class="info-item">
+                  <strong>Destino:</strong> <span id="asignarDestino">-</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="selectRepartidor">Seleccionar Repartidor *</label>
+              <select id="selectRepartidor" required>
+                <option value="">Seleccionar repartidor...</option>
+              </select>
+              <button
+                type="button"
+                onclick="debugRepartidores()"
+                class="btn-secondary"
+                style="margin-top: 5px; font-size: 12px"
+              >
+                🔍 Debug Repartidores
+              </button>
+            </div>
+
+            <div class="form-group">
+              <label for="notasAsignacion">Notas de Asignación</label>
+              <textarea
+                id="notasAsignacion"
+                rows="3"
+                placeholder="Instrucciones especiales para el repartidor..."
+              ></textarea>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn-secondary" id="cancelAsignar">
+                Cancelar
+              </button>
+              <button type="submit" class="btn-primary">
+                Asignar Repartidor
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para ver detalles del cliente -->
+    <div id="clienteDetalleModal" class="modal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3>Detalles del Cliente</h3>
+          <span class="close" id="closeClienteDetalleModal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div id="clienteDetalleContent" class="cliente-detalle-grid">
+            <!-- Los detalles se llenarán dinámicamente -->
+          </div>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              id="closeClienteDetalle"
+            >
+              Cerrar
+            </button>
+            <button
+              type="button"
+              class="btn-primary"
+              id="editarClienteFromDetalle"
+            >
+              Editar Cliente
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para editar cliente -->
+    <div id="editarClienteModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Editar Cliente</h3>
+          <span class="close" id="closeEditarClienteModal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="editarClienteForm">
+            <div class="form-group">
+              <label for="editClienteNombre">Nombre Completo *</label>
+              <input type="text" id="editClienteNombre" required />
+            </div>
+
+            <div class="form-group">
+              <label for="editClienteTelefono">Teléfono *</label>
+              <input type="tel" id="editClienteTelefono" required />
+            </div>
+
+            <div class="form-group">
+              <label for="editClienteEmail">Email</label>
+              <input type="email" id="editClienteEmail" />
+            </div>
+
+            <div class="form-group">
+              <label for="editClienteDireccion">Dirección</label>
+              <textarea id="editClienteDireccion" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="editClienteNotas">Notas</label>
+              <textarea
+                id="editClienteNotas"
+                rows="2"
+                placeholder="Notas adicionales sobre el cliente..."
+              ></textarea>
+            </div>
+
+            <div class="modal-actions">
+              <button
+                type="button"
+                class="btn-secondary"
+                id="cancelEditarCliente"
+              >
+                Cancelar
+              </button>
+              <button type="submit" class="btn-primary">Guardar Cambios</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para opciones de exportación -->
+    <div id="exportacionModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>📊 Exportar Datos de Clientes</h3>
+          <span class="close" id="closeExportacionModal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="export-options">
+            <h4>Selecciona el formato de exportación:</h4>
+
+            <div class="export-option">
+              <input
+                type="radio"
+                id="exportCSV"
+                name="exportFormat"
+                value="csv"
+                checked
+              />
+              <label for="exportCSV">
+                <strong>📄 CSV (Comma Separated Values)</strong>
+                <p>Compatible con Excel, Google Sheets y análisis de datos</p>
+              </label>
+            </div>
+
+            <div class="export-option">
+              <input
+                type="radio"
+                id="exportExcel"
+                name="exportFormat"
+                value="excel"
+              />
+              <label for="exportExcel">
+                <strong>📊 Excel Compatible</strong>
+                <p>
+                  Formato optimizado para Microsoft Excel con codificación UTF-8
+                </p>
+              </label>
+            </div>
+
+            <div class="export-option">
+              <input
+                type="radio"
+                id="exportDetallado"
+                name="exportFormat"
+                value="detallado"
+              />
+              <label for="exportDetallado">
+                <strong>📋 Reporte Detallado</strong>
+                <p>Incluye historial completo de envíos por cliente</p>
+              </label>
+            </div>
+          </div>
+
+          <div class="export-filters">
+            <h4>Filtros de exportación:</h4>
+
+            <div class="filter-group">
+              <label>
+                <input type="checkbox" id="incluirInactivos" checked />
+                Incluir clientes inactivos
+              </label>
+            </div>
+
+            <div class="filter-group">
+              <label>
+                <input type="checkbox" id="soloFrecuentes" />
+                Solo clientes frecuentes y VIP
+              </label>
+            </div>
+
+            <div class="filter-group">
+              <label for="fechaDesde">Clientes con envíos desde:</label>
+              <input type="date" id="fechaDesde" />
+            </div>
+          </div>
+
+          <div class="export-preview">
+            <h4>Vista previa:</h4>
+            <p id="exportPreview">
+              Se exportarán <strong id="clientesCount">0</strong> clientes con
+              los filtros seleccionados.
+            </p>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="cancelExportacion">
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn-primary"
+              onclick="ejecutarExportacion()"
+            >
+              📥 Descargar Archivo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="admin-script.js"></script>
+  </body>
+</html>

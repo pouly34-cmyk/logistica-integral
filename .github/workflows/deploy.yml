@@ -1,0 +1,67 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js (for future use)
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies (if package.json exists)
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+          else
+            echo "No package.json found, skipping npm install"
+          fi
+
+      - name: Run tests (if available)
+        run: |
+          echo "Running basic file checks..."
+          # Verificar que los archivos principales existen
+          test -f index.html || (echo "index.html not found" && exit 1)
+          test -f admin.html || (echo "admin.html not found" && exit 1)
+          test -f login.html || (echo "login.html not found" && exit 1)
+          test -f script.js || (echo "script.js not found" && exit 1)
+          test -f admin-script.js || (echo "admin-script.js not found" && exit 1)
+          test -f style.css || (echo "style.css not found" && exit 1)
+          test -f admin-style.css || (echo "admin-style.css not found" && exit 1)
+          echo "All main files found ✅"
+
+      - name: Validate HTML (basic check)
+        run: |
+          echo "Checking HTML syntax..."
+          # Verificar que los archivos HTML no están vacíos y tienen estructura básica
+          grep -q "<!DOCTYPE html>" index.html || (echo "index.html missing DOCTYPE" && exit 1)
+          grep -q "<!DOCTYPE html>" admin.html || (echo "admin.html missing DOCTYPE" && exit 1)
+          grep -q "<!DOCTYPE html>" login.html || (echo "login.html missing DOCTYPE" && exit 1)
+          echo "HTML files validated ✅"
+
+      - name: Check JavaScript syntax (basic)
+        run: |
+          echo "Checking JavaScript files..."
+          # Verificar que los archivos JS no están vacíos
+          test -s script.js || (echo "script.js is empty" && exit 1)
+          test -s admin-script.js || (echo "admin-script.js is empty" && exit 1)
+          test -s login-script.js || (echo "login-script.js is empty" && exit 1)
+          echo "JavaScript files checked ✅"
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          exclude_assets: ".github,tests,docs/especificaciones,*.md,*.example.*"

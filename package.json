@@ -1,0 +1,67 @@
+{
+  "name": "logistica-integral",
+  "version": "1.0.0",
+  "description": "Sistema web completo para gestión de envíos y paquetería con cobertura CDMX-Puebla",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8000 -c-1",
+    "dev": "npx live-server --port=8000 --no-browser",
+    "test": "echo \"Abre tests/test-funcionalidad.html en tu navegador para ejecutar las pruebas\" && exit 0",
+    "build": "echo \"Este es un proyecto estático, no requiere build\" && exit 0",
+    "deploy": "echo \"Configura GitHub Pages o tu servicio de hosting preferido\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tu-usuario/logistica-integral.git"
+  },
+  "keywords": [
+    "logistica",
+    "paqueteria",
+    "envios",
+    "cdmx",
+    "puebla",
+    "javascript",
+    "html",
+    "css",
+    "spa",
+    "admin-panel",
+    "shipping",
+    "tracking",
+    "delivery"
+  ],
+  "author": {
+    "name": "Tu Nombre",
+    "email": "tu-email@ejemplo.com",
+    "url": "https://tu-sitio-web.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tu-usuario/logistica-integral/issues"
+  },
+  "homepage": "https://tu-usuario.github.io/logistica-integral/",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ],
+  "files": [
+    "*.html",
+    "*.css",
+    "*.js",
+    "img/",
+    "docs/",
+    "tests/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ]
+}

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es-ES">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Admin - Logística Integral</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f8f9fa;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .header {
+        background: #2c3e50;
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      .stat-number {
+        font-size: 2rem;
+        color: #3498db;
+        font-weight: bold;
+      }
+      .table-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .table-header {
+        background: #2c3e50;
+        color: white;
+        padding: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ecf0f1;
+      }
+      th {
+        background: #f8f9fa;
+        color: #2c3e50;
+      }
+      .btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: #2980b9;
+      }
+      .logout-btn {
+        background: #e74c3c;
+      }
+      .logout-btn:hover {
+        background: #c0392b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🚚 Panel de Administración</h1>
+        <div>
+          <span id="userName">Admin</span>
+          <button class="btn logout-btn" onclick="logout()">
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-number" id="totalEnvios">0</div>
+          <div>Total Envíos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="enviosHoy">0</div>
+          <div>Envíos Hoy</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="pendientes">0</div>
+          <div>Pendientes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="ingresos">$0</div>
+          <div>Ingresos Hoy</div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <div class="table-header">
+          <h3>📦 Todos los Envíos</h3>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Guía</th>
+              <th>Cliente</th>
+              <th>Origen</th>
+              <th>Destino</th>
+              <th>Precio</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="enviosTable">
+            <tr>
+              <td colspan="8" style="text-align: center; color: #7f8c8d">
+                No hay envíos registrados
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      // Script simplificado para pruebas
+      let enviosData = [];
+
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("Test admin cargado");
+
+        // Verificar auth
+        const user = localStorage.getItem("adminUser");
+        if (!user) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        // Cargar datos
+        loadData();
+        updateUI();
+      });
+
+      function loadData() {
+        try {
+          const envios = localStorage.getItem("enviosLogistica");
+          enviosData = envios ? JSON.parse(envios) : [];
+          console.log("Envíos cargados:", enviosData.length);
+        } catch (error) {
+          console.error("Error:", error);
+          enviosData = [];
+        }
+      }
+
+      function updateUI() {
+        // Estadísticas
+        document.getElementById("totalEnvios").textContent = enviosData.length;
+
+        const hoy = new Date().toDateString();
+        const enviosHoy = enviosData.filter(
+          (e) => new Date(e.fechaCreacion).toDateString() === hoy
+        );
+        document.getElementById("enviosHoy").textContent = enviosHoy.length;
+
+        const pendientes = enviosData.filter(
+          (e) => !e.estado || e.estado === "pendiente"
+        );
+        document.getElementById("pendientes").textContent = pendientes.length;
+
+        const ingresos = enviosHoy.reduce((sum, e) => sum + (e.precio || 0), 0);
+        document.getElementById("ingresos").textContent = `$${ingresos}`;
+
+        // Tabla
+        const tbody = document.getElementById("enviosTable");
+        if (enviosData.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="8" style="text-align: center; color: #7f8c8d;">No hay envíos registrados</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = enviosData
+          .map(
+            (envio) => `
+                <tr>
+                    <td>${envio.numeroGuia}</td>
+                    <td>${envio.cliente?.nombre || "N/A"}</td>
+                    <td>${envio.origenCiudad}</td>
+                    <td>${envio.destinoCiudad}</td>
+                    <td>$${envio.precio}</td>
+                    <td>${envio.estado || "pendiente"}</td>
+                    <td>${new Date(
+                      envio.fechaCreacion
+                    ).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn" onclick="verDetalle('${
+                          envio.numeroGuia
+                        }')">Ver</button>
+                    </td>
+                </tr>
+            `
+          )
+          .join("");
+      }
+
+      function verDetalle(guia) {
+        const envio = enviosData.find((e) => e.numeroGuia === guia);
+        if (envio) {
+          alert(
+            `Envío: ${guia}\nCliente: ${envio.cliente?.nombre}\nPrecio: $${envio.precio}`
+          );
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem("adminUser");
+        window.location.href = "login.html";
+      }
+    </script>
+  </body>
+</html>
