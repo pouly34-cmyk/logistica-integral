@@ -359,7 +359,7 @@ function cargarTablaRepartidores() {
 
   if (repartidoresData.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="5" class="no-data">No hay repartidores registrados</td></tr>';
+      '<tr><td colspan="6" class="no-data">No hay repartidores registrados</td></tr>';
     return;
   }
 
@@ -367,15 +367,33 @@ function cargarTablaRepartidores() {
     .map(
       (repartidor) => `
     <tr>
+      <td>${repartidor.id || "N/A"}</td>
       <td>${repartidor.personalInfo?.name || "N/A"} ${
         repartidor.personalInfo?.lastName || ""
       }</td>
-      <td>${repartidor.personalInfo?.phone || "N/A"}</td>
-      <td>${repartidor.workInfo?.coverageZones?.[0] || "N/A"}</td>
+      <td>${repartidor.workInfo?.vehicleType || "N/A"}</td>
+      <td>${repartidor.workInfo?.vehicleDetails?.licensePlate || "N/A"}</td>
       <td><span class="status-badge status-${
         repartidor.workInfo?.status || "active"
-      }">${repartidor.workInfo?.status || "Activo"}</span></td>
-      <td>${repartidor.performance?.totalDeliveries || 0}</td>
+      }">${
+        repartidor.workInfo?.status === "active"
+          ? "Activo"
+          : repartidor.workInfo?.status === "inactive"
+          ? "Inactivo"
+          : "Activo"
+      }</span></td>
+      <td>
+        <button onclick="verRepartidor('${
+          repartidor.id
+        }')" class="btn-small btn-primary" title="Ver Detalles">
+          👁️ Ver
+        </button>
+        <button onclick="editarRepartidor('${
+          repartidor.id
+        }')" class="btn-small btn-secondary" title="Editar">
+          ✏️ Editar
+        </button>
+      </td>
     </tr>
   `
     )
@@ -384,6 +402,9 @@ function cargarTablaRepartidores() {
   console.log(
     `✅ Tabla de repartidores cargada: ${repartidoresData.length} registros`
   );
+
+  // Configurar botón agregar repartidor
+  configurarBotonAgregarRepartidor();
 }
 
 // Generar reportes
@@ -827,3 +848,446 @@ function mostrarNotificacion(mensaje, tipo = "info") {
 }
 
 console.log("✅ Funciones de asignación de repartidores cargadas");
+// ==========================================
+// GESTIÓN DE REPARTIDORES
+// ==========================================
+
+// Configurar botón agregar repartidor
+function configurarBotonAgregarRepartidor() {
+  const addBtn = document.getElementById("addRepartidorBtn");
+  if (addBtn) {
+    // Remover eventos anteriores
+    addBtn.onclick = null;
+
+    // Agregar nuevo evento
+    addBtn.addEventListener("click", function () {
+      console.log("➕ Abriendo modal agregar repartidor");
+      mostrarModalAgregarRepartidor();
+    });
+
+    console.log("✅ Botón agregar repartidor configurado");
+  } else {
+    console.warn("⚠️ Botón addRepartidorBtn no encontrado");
+  }
+}
+
+// Mostrar modal para agregar repartidor
+function mostrarModalAgregarRepartidor() {
+  const modal = crearModalRepartidor();
+  document.body.appendChild(modal);
+  modal.style.display = "flex";
+}
+
+// Crear modal de repartidor
+function crearModalRepartidor(repartidor = null) {
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.id = "modalRepartidor";
+
+  const isEdit = repartidor !== null;
+  const titulo = isEdit ? "✏️ Editar Repartidor" : "➕ Agregar Repartidor";
+
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>${titulo}</h3>
+        <button class="modal-close" onclick="cerrarModalRepartidor()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <form id="formRepartidor">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="repartidorNombre">👤 Nombre *</label>
+              <input type="text" id="repartidorNombre" class="form-input" required 
+                     value="${
+                       repartidor?.personalInfo?.name || ""
+                     }" placeholder="Nombre del repartidor">
+            </div>
+            
+            <div class="form-group">
+              <label for="repartidorApellido">👤 Apellido *</label>
+              <input type="text" id="repartidorApellido" class="form-input" required 
+                     value="${
+                       repartidor?.personalInfo?.lastName || ""
+                     }" placeholder="Apellido del repartidor">
+            </div>
+            
+            <div class="form-group">
+              <label for="repartidorTelefono">📱 Teléfono *</label>
+              <input type="tel" id="repartidorTelefono" class="form-input" required 
+                     value="${
+                       repartidor?.personalInfo?.phone || ""
+                     }" placeholder="Número de teléfono">
+            </div>
+            
+            <div class="form-group">
+              <label for="repartidorEmail">📧 Email</label>
+              <input type="email" id="repartidorEmail" class="form-input" 
+                     value="${
+                       repartidor?.personalInfo?.email || ""
+                     }" placeholder="Correo electrónico">
+            </div>
+            
+            <div class="form-group">
+              <label for="repartidorVehiculo">🚗 Tipo de Vehículo *</label>
+              <select id="repartidorVehiculo" class="form-select" required>
+                <option value="">Seleccionar vehículo</option>
+                <option value="motorcycle" ${
+                  repartidor?.workInfo?.vehicleType === "motorcycle"
+                    ? "selected"
+                    : ""
+                }>🏍️ Motocicleta</option>
+                <option value="bicycle" ${
+                  repartidor?.workInfo?.vehicleType === "bicycle"
+                    ? "selected"
+                    : ""
+                }>🚲 Bicicleta</option>
+                <option value="car" ${
+                  repartidor?.workInfo?.vehicleType === "car" ? "selected" : ""
+                }>🚗 Automóvil</option>
+                <option value="van" ${
+                  repartidor?.workInfo?.vehicleType === "van" ? "selected" : ""
+                }>🚐 Camioneta</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="repartidorPlaca">🔢 Placa del Vehículo</label>
+              <input type="text" id="repartidorPlaca" class="form-input" 
+                     value="${
+                       repartidor?.workInfo?.vehicleDetails?.licensePlate || ""
+                     }" 
+                     placeholder="Número de placa" style="text-transform: uppercase;">
+            </div>
+            
+            <div class="form-group">
+              <label for="repartidorZona">📍 Zona de Cobertura *</label>
+              <select id="repartidorZona" class="form-select" required>
+                <option value="">Seleccionar zona</option>
+                <option value="CDMX Norte" ${
+                  repartidor?.workInfo?.coverageZones?.[0] === "CDMX Norte"
+                    ? "selected"
+                    : ""
+                }>CDMX Norte</option>
+                <option value="CDMX Sur" ${
+                  repartidor?.workInfo?.coverageZones?.[0] === "CDMX Sur"
+                    ? "selected"
+                    : ""
+                }>CDMX Sur</option>
+                <option value="CDMX Centro" ${
+                  repartidor?.workInfo?.coverageZones?.[0] === "CDMX Centro"
+                    ? "selected"
+                    : ""
+                }>CDMX Centro</option>
+                <option value="CDMX Oriente" ${
+                  repartidor?.workInfo?.coverageZones?.[0] === "CDMX Oriente"
+                    ? "selected"
+                    : ""
+                }>CDMX Oriente</option>
+                <option value="CDMX Poniente" ${
+                  repartidor?.workInfo?.coverageZones?.[0] === "CDMX Poniente"
+                    ? "selected"
+                    : ""
+                }>CDMX Poniente</option>
+                <option value="Puebla Centro" ${
+                  repartidor?.workInfo?.coverageZones?.[0] === "Puebla Centro"
+                    ? "selected"
+                    : ""
+                }>Puebla Centro</option>
+                <option value="Puebla Norte" ${
+                  repartidor?.workInfo?.coverageZones?.[0] === "Puebla Norte"
+                    ? "selected"
+                    : ""
+                }>Puebla Norte</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="repartidorEstado">⚡ Estado</label>
+              <select id="repartidorEstado" class="form-select">
+                <option value="active" ${
+                  repartidor?.workInfo?.status === "active" || !repartidor
+                    ? "selected"
+                    : ""
+                }>✅ Activo</option>
+                <option value="inactive" ${
+                  repartidor?.workInfo?.status === "inactive" ? "selected" : ""
+                }>❌ Inactivo</option>
+                <option value="suspended" ${
+                  repartidor?.workInfo?.status === "suspended" ? "selected" : ""
+                }>⏸️ Suspendido</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="cerrarModalRepartidor()" class="btn-secondary">Cancelar</button>
+        <button onclick="guardarRepartidor(${
+          isEdit ? `'${repartidor?.id}'` : "null"
+        })" class="btn-primary">
+          ${isEdit ? "💾 Actualizar" : "➕ Agregar"} Repartidor
+        </button>
+      </div>
+    </div>
+  `;
+
+  return modal;
+}
+
+// Guardar repartidor (nuevo o editado)
+function guardarRepartidor(repartidorId = null) {
+  console.log("💾 Guardando repartidor...");
+
+  try {
+    // Obtener datos del formulario
+    const nombre = document.getElementById("repartidorNombre").value.trim();
+    const apellido = document.getElementById("repartidorApellido").value.trim();
+    const telefono = document.getElementById("repartidorTelefono").value.trim();
+    const email = document.getElementById("repartidorEmail").value.trim();
+    const vehiculo = document.getElementById("repartidorVehiculo").value;
+    const placa = document
+      .getElementById("repartidorPlaca")
+      .value.trim()
+      .toUpperCase();
+    const zona = document.getElementById("repartidorZona").value;
+    const estado = document.getElementById("repartidorEstado").value;
+
+    // Validaciones
+    if (!nombre || !apellido || !telefono || !vehiculo || !zona) {
+      mostrarNotificacion(
+        "Por favor completa todos los campos obligatorios",
+        "warning"
+      );
+      return;
+    }
+
+    // Crear objeto repartidor
+    const repartidorData = {
+      id: repartidorId || `REP-${Date.now()}`,
+      personalInfo: {
+        name: nombre,
+        lastName: apellido,
+        phone: telefono,
+        email: email || null,
+        address: "",
+        emergencyContact: {
+          name: "",
+          phone: "",
+          relationship: "",
+        },
+      },
+      workInfo: {
+        employeeId: repartidorId || `EMP-${Date.now()}`,
+        startDate: new Date().toISOString(),
+        status: estado,
+        coverageZones: [zona],
+        vehicleType: vehiculo,
+        vehicleDetails: {
+          brand: "",
+          model: "",
+          year: new Date().getFullYear(),
+          licensePlate: placa,
+          color: "",
+        },
+      },
+      credentials: {
+        username: `${nombre.toLowerCase()}.${apellido.toLowerCase()}`,
+        password: "repartidor123",
+        lastLogin: null,
+      },
+      performance: {
+        totalDeliveries: 0,
+        completedDeliveries: 0,
+        averageRating: 0,
+        onTimeDeliveryRate: 0,
+        currentAssignedShipments: [],
+      },
+      timestamps: {
+        created: repartidorId ? undefined : new Date().toISOString(),
+        updated: new Date().toISOString(),
+        lastActive: null,
+      },
+    };
+
+    // Agregar o actualizar repartidor
+    if (repartidorId) {
+      // Actualizar existente
+      const index = repartidoresData.findIndex((r) => r.id === repartidorId);
+      if (index !== -1) {
+        // Mantener datos originales importantes
+        repartidorData.timestamps.created =
+          repartidoresData[index].timestamps?.created;
+        repartidorData.performance =
+          repartidoresData[index].performance || repartidorData.performance;
+
+        repartidoresData[index] = repartidorData;
+        console.log(`✅ Repartidor ${repartidorId} actualizado`);
+      }
+    } else {
+      // Agregar nuevo
+      repartidoresData.push(repartidorData);
+      console.log(`✅ Nuevo repartidor agregado: ${repartidorData.id}`);
+    }
+
+    // Guardar en localStorage
+    localStorage.setItem("repartidoresData", JSON.stringify(repartidoresData));
+
+    // Actualizar tabla
+    cargarTablaRepartidores();
+
+    // Cerrar modal
+    cerrarModalRepartidor();
+
+    // Mostrar confirmación
+    const accion = repartidorId ? "actualizado" : "agregado";
+    mostrarNotificacion(
+      `Repartidor ${accion} exitosamente: ${nombre} ${apellido}`,
+      "success"
+    );
+  } catch (error) {
+    console.error("❌ Error guardando repartidor:", error);
+    mostrarNotificacion("Error al guardar repartidor", "error");
+  }
+}
+
+// Ver detalles del repartidor
+function verRepartidor(repartidorId) {
+  console.log(`👁️ Ver repartidor: ${repartidorId}`);
+
+  const repartidor = repartidoresData.find((r) => r.id === repartidorId);
+  if (!repartidor) {
+    mostrarNotificacion("Repartidor no encontrado", "error");
+    return;
+  }
+
+  const modal = crearModalDetalleRepartidor(repartidor);
+  document.body.appendChild(modal);
+  modal.style.display = "flex";
+}
+
+// Crear modal de detalle del repartidor
+function crearModalDetalleRepartidor(repartidor) {
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.id = "modalDetalleRepartidor";
+
+  const estadoColor = {
+    active: "🟢",
+    inactive: "🔴",
+    suspended: "🟡",
+  };
+
+  const estadoTexto = {
+    active: "Activo",
+    inactive: "Inactivo",
+    suspended: "Suspendido",
+  };
+
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>👁️ Detalles del Repartidor</h3>
+        <button class="modal-close" onclick="cerrarModalDetalleRepartidor()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="repartidor-detalle">
+          <div class="detalle-section">
+            <h4>👤 Información Personal</h4>
+            <p><strong>ID:</strong> ${repartidor.id}</p>
+            <p><strong>Nombre:</strong> ${
+              repartidor.personalInfo?.name || "N/A"
+            } ${repartidor.personalInfo?.lastName || ""}</p>
+            <p><strong>Teléfono:</strong> ${
+              repartidor.personalInfo?.phone || "N/A"
+            }</p>
+            <p><strong>Email:</strong> ${
+              repartidor.personalInfo?.email || "No especificado"
+            }</p>
+          </div>
+          
+          <div class="detalle-section">
+            <h4>🚗 Información Laboral</h4>
+            <p><strong>Estado:</strong> ${
+              estadoColor[repartidor.workInfo?.status] || "🟢"
+            } ${estadoTexto[repartidor.workInfo?.status] || "Activo"}</p>
+            <p><strong>Zona:</strong> ${
+              repartidor.workInfo?.coverageZones?.[0] || "N/A"
+            }</p>
+            <p><strong>Vehículo:</strong> ${
+              repartidor.workInfo?.vehicleType || "N/A"
+            }</p>
+            <p><strong>Placa:</strong> ${
+              repartidor.workInfo?.vehicleDetails?.licensePlate || "N/A"
+            }</p>
+            <p><strong>Fecha de ingreso:</strong> ${
+              repartidor.workInfo?.startDate
+                ? new Date(repartidor.workInfo.startDate).toLocaleDateString()
+                : "N/A"
+            }</p>
+          </div>
+          
+          <div class="detalle-section">
+            <h4>📊 Rendimiento</h4>
+            <p><strong>Entregas totales:</strong> ${
+              repartidor.performance?.totalDeliveries || 0
+            }</p>
+            <p><strong>Entregas completadas:</strong> ${
+              repartidor.performance?.completedDeliveries || 0
+            }</p>
+            <p><strong>Envíos asignados:</strong> ${
+              repartidor.performance?.currentAssignedShipments?.length || 0
+            }</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="cerrarModalDetalleRepartidor()" class="btn-secondary">Cerrar</button>
+        <button onclick="editarRepartidor('${
+          repartidor.id
+        }')" class="btn-primary">✏️ Editar</button>
+      </div>
+    </div>
+  `;
+
+  return modal;
+}
+
+// Editar repartidor
+function editarRepartidor(repartidorId) {
+  console.log(`✏️ Editar repartidor: ${repartidorId}`);
+
+  // Cerrar modal de detalle si está abierto
+  cerrarModalDetalleRepartidor();
+
+  const repartidor = repartidoresData.find((r) => r.id === repartidorId);
+  if (!repartidor) {
+    mostrarNotificacion("Repartidor no encontrado", "error");
+    return;
+  }
+
+  const modal = crearModalRepartidor(repartidor);
+  document.body.appendChild(modal);
+  modal.style.display = "flex";
+}
+
+// Cerrar modales
+function cerrarModalRepartidor() {
+  const modal = document.getElementById("modalRepartidor");
+  if (modal) {
+    modal.remove();
+  }
+}
+
+function cerrarModalDetalleRepartidor() {
+  const modal = document.getElementById("modalDetalleRepartidor");
+  if (modal) {
+    modal.remove();
+  }
+}
+
+console.log("✅ Funciones de gestión de repartidores cargadas");
