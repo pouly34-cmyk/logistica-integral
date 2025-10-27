@@ -568,7 +568,7 @@ function mostrarModalAgregarRepartidor() {
     <div style="background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h3 style="margin: 0;">➕ Agregar Repartidor</h3>
-        <button onclick="cerrarModalRepartidor()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+        <button id="btnCerrarModal" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
       </div>
       
       <form id="formRepartidor" style="display: grid; gap: 15px;">
@@ -619,13 +619,62 @@ function mostrarModalAgregarRepartidor() {
       </form>
       
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-        <button onclick="cerrarModalRepartidor()" style="padding: 10px 20px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">Cancelar</button>
-        <button onclick="guardarRepartidor()" style="padding: 10px 20px; border: none; background: #3498db; color: white; border-radius: 4px; cursor: pointer;">➕ Agregar Repartidor</button>
+        <button id="btnCancelar" style="padding: 10px 20px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">Cancelar</button>
+        <button id="btnGuardar" style="padding: 10px 20px; border: none; background: #3498db; color: white; border-radius: 4px; cursor: pointer;">➕ Agregar Repartidor</button>
       </div>
     </div>
   `;
 
   document.body.appendChild(modal);
+
+  // Configurar event listeners para los botones DESPUÉS de agregar al DOM
+  setTimeout(() => {
+    const btnCerrarModal = document.getElementById("btnCerrarModal");
+    const btnCancelar = document.getElementById("btnCancelar");
+    const btnGuardar = document.getElementById("btnGuardar");
+
+    console.log("🔧 Configurando event listeners...");
+    console.log("Botones encontrados:", {
+      cerrar: !!btnCerrarModal,
+      cancelar: !!btnCancelar,
+      guardar: !!btnGuardar,
+    });
+
+    if (btnCerrarModal) {
+      btnCerrarModal.addEventListener("click", function (e) {
+        e.preventDefault();
+        console.log("🔴 Click en cerrar modal");
+        cerrarModalRepartidor();
+      });
+    }
+
+    if (btnCancelar) {
+      btnCancelar.addEventListener("click", function (e) {
+        e.preventDefault();
+        console.log("🔴 Click en cancelar");
+        cerrarModalRepartidor();
+      });
+    }
+
+    if (btnGuardar) {
+      btnGuardar.addEventListener("click", function (e) {
+        e.preventDefault();
+        console.log("💾 Click en guardar");
+        guardarRepartidor();
+      });
+    }
+
+    // También permitir cerrar haciendo click fuera del modal
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) {
+        console.log("🔴 Click fuera del modal");
+        cerrarModalRepartidor();
+      }
+    });
+
+    console.log("✅ Event listeners configurados correctamente");
+  }, 100);
+
   console.log("✅ Modal agregado al DOM");
 }
 
