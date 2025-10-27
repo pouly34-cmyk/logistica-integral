@@ -488,3 +488,342 @@ console.log("✅ Admin script cargado completamente");
 console.log(
   "🛠️ Funciones de debug disponibles: debugAdmin(), testNavegacion('seccion')"
 );
+// ==========================================
+// FUNCIONES DE ASIGNACIÓN DE REPARTIDORES
+// ==========================================
+
+// Función para asignación automática de repartidores
+function asignacionAutomatica() {
+  console.log("🎲 Iniciando asignación automática...");
+
+  try {
+    // Filtrar envíos sin repartidor asignado
+    const enviosSinAsignar = enviosData.filter(
+      (envio) => !envio.repartidorAsignado
+    );
+
+    if (enviosSinAsignar.length === 0) {
+      mostrarNotificacion("No hay envíos sin asignar", "info");
+      return;
+    }
+
+    if (repartidoresData.length === 0) {
+      mostrarNotificacion("No hay repartidores disponibles", "error");
+      return;
+    }
+
+    let asignados = 0;
+
+    enviosSinAsignar.forEach((envio) => {
+      // Buscar repartidores activos
+      const repartidoresActivos = repartidoresData.filter(
+        (r) => r.workInfo?.status === "active" || !r.workInfo?.status
+      );
+
+      if (repartidoresActivos.length > 0) {
+        // Asignar aleatoriamente
+        const repartidorAleatorio =
+          repartidoresActivos[
+            Math.floor(Math.random() * repartidoresActivos.length)
+          ];
+        envio.repartidorAsignado = repartidorAleatorio.id;
+        asignados++;
+
+        console.log(
+          `✅ Envío ${envio.numeroGuia} asignado a ${repartidorAleatorio.personalInfo?.name}`
+        );
+      }
+    });
+
+    // Guardar cambios
+    localStorage.setItem("enviosLogistica", JSON.stringify(enviosData));
+
+    // Actualizar tabla
+    cargarTablaEnvios();
+
+    // Mostrar resultado
+    mostrarNotificacion(
+      `${asignados} envíos asignados automáticamente`,
+      "success"
+    );
+
+    console.log(
+      `🎉 Asignación automática completada: ${asignados} envíos asignados`
+    );
+  } catch (error) {
+    console.error("❌ Error en asignación automática:", error);
+    mostrarNotificacion("Error en la asignación automática", "error");
+  }
+}
+
+// Función para asignación manual de repartidor
+function asignarRepartidorManual(numeroGuia) {
+  console.log(`👤 Asignación manual para envío: ${numeroGuia}`);
+
+  try {
+    // Encontrar el envío
+    const envio = enviosData.find((e) => e.numeroGuia === numeroGuia);
+    if (!envio) {
+      mostrarNotificacion("Envío no encontrado", "error");
+      return;
+    }
+
+    // Crear modal de selección de repartidor
+    const modal = crearModalAsignacion(envio);
+    document.body.appendChild(modal);
+
+    // Mostrar modal
+    modal.style.display = "flex";
+  } catch (error) {
+    console.error("❌ Error en asignación manual:", error);
+    mostrarNotificacion("Error en la asignación manual", "error");
+  }
+}
+
+// Crear modal de asignación
+function crearModalAsignacion(envio) {
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.id = "modalAsignacion";
+
+  const repartidoresOptions = repartidoresData
+    .filter((r) => r.workInfo?.status === "active" || !r.workInfo?.status)
+    .map(
+      (r) => `
+      <option value="${r.id}">
+        ${r.personalInfo?.name || "N/A"} ${r.personalInfo?.lastName || ""} 
+        - ${r.workInfo?.coverageZones?.[0] || "Sin zona"}
+      </option>
+    `
+    )
+    .join("");
+
+  modal.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>👤 Asignar Repartidor</h3>
+        <button class="modal-close" onclick="cerrarModalAsignacion()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="envio-info">
+          <h4>📦 Información del Envío</h4>
+          <p><strong>Guía:</strong> ${envio.numeroGuia}</p>
+          <p><strong>Cliente:</strong> ${envio.cliente?.nombre || "N/A"}</p>
+          <p><strong>Ruta:</strong> ${envio.origenCiudad} → ${
+    envio.destinoCiudad
+  }</p>
+          <p><strong>Estado:</strong> ${envio.estado || "Pendiente"}</p>
+        </div>
+        
+        <div class="asignacion-form">
+          <label for="selectRepartidor">🚚 Seleccionar Repartidor:</label>
+          <select id="selectRepartidor" class="form-select">
+            <option value="">-- Seleccionar Repartidor --</option>
+            ${repartidoresOptions}
+          </select>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="cerrarModalAsignacion()" class="btn-secondary">Cancelar</button>
+        <button onclick="confirmarAsignacion('${
+          envio.numeroGuia
+        }')" class="btn-primary">✅ Asignar</button>
+      </div>
+    </div>
+  `;
+
+  return modal;
+}
+
+// Confirmar asignación
+function confirmarAsignacion(numeroGuia) {
+  const selectRepartidor = document.getElementById("selectRepartidor");
+  const repartidorId = selectRepartidor.value;
+
+  if (!repartidorId) {
+    mostrarNotificacion("Selecciona un repartidor", "warning");
+    return;
+  }
+
+  try {
+    // Encontrar y actualizar el envío
+    const envio = enviosData.find((e) => e.numeroGuia === numeroGuia);
+    if (envio) {
+      envio.repartidorAsignado = repartidorId;
+
+      // Guardar cambios
+      localStorage.setItem("enviosLogistica", JSON.stringify(enviosData));
+
+      // Actualizar tabla
+      cargarTablaEnvios();
+
+      // Cerrar modal
+      cerrarModalAsignacion();
+
+      // Mostrar confirmación
+      const repartidor = repartidoresData.find((r) => r.id === repartidorId);
+      const nombreRepartidor = `${repartidor.personalInfo?.name || ""} ${
+        repartidor.personalInfo?.lastName || ""
+      }`.trim();
+
+      mostrarNotificacion(
+        `Envío ${numeroGuia} asignado a ${nombreRepartidor}`,
+        "success"
+      );
+
+      console.log(
+        `✅ Envío ${numeroGuia} asignado manualmente a ${nombreRepartidor}`
+      );
+    }
+  } catch (error) {
+    console.error("❌ Error confirmando asignación:", error);
+    mostrarNotificacion("Error al asignar repartidor", "error");
+  }
+}
+
+// Cerrar modal de asignación
+function cerrarModalAsignacion() {
+  const modal = document.getElementById("modalAsignacion");
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// Función para cambiar estado de envío
+function cambiarEstadoEnvio(numeroGuia) {
+  console.log(`🔄 Cambiar estado del envío: ${numeroGuia}`);
+
+  try {
+    const envio = enviosData.find((e) => e.numeroGuia === numeroGuia);
+    if (!envio) {
+      mostrarNotificacion("Envío no encontrado", "error");
+      return;
+    }
+
+    // Estados disponibles
+    const estados = [
+      { value: "pendiente", label: "📋 Pendiente" },
+      { value: "en_transito", label: "🚚 En Tránsito" },
+      { value: "en_reparto", label: "📦 En Reparto" },
+      { value: "entregado", label: "✅ Entregado" },
+      { value: "cancelado", label: "❌ Cancelado" },
+    ];
+
+    const estadoActual = envio.estado || "pendiente";
+    const nuevosEstados = estados.filter((e) => e.value !== estadoActual);
+
+    const opciones = nuevosEstados
+      .map((e) => `<option value="${e.value}">${e.label}</option>`)
+      .join("");
+
+    const nuevoEstado = prompt(
+      `Estado actual: ${estadoActual}\n\nSelecciona nuevo estado:\n${nuevosEstados
+        .map((e, i) => `${i + 1}. ${e.label}`)
+        .join("\n")}\n\nEscribe el número:`
+    );
+
+    if (
+      nuevoEstado &&
+      nuevoEstado >= 1 &&
+      nuevoEstado <= nuevosEstados.length
+    ) {
+      const estadoSeleccionado = nuevosEstados[nuevoEstado - 1];
+      envio.estado = estadoSeleccionado.value;
+
+      // Guardar cambios
+      localStorage.setItem("enviosLogistica", JSON.stringify(enviosData));
+
+      // Actualizar tabla
+      cargarTablaEnvios();
+
+      mostrarNotificacion(
+        `Estado cambiado a: ${estadoSeleccionado.label}`,
+        "success"
+      );
+
+      console.log(
+        `✅ Estado del envío ${numeroGuia} cambiado a: ${estadoSeleccionado.value}`
+      );
+    }
+  } catch (error) {
+    console.error("❌ Error cambiando estado:", error);
+    mostrarNotificacion("Error al cambiar estado", "error");
+  }
+}
+
+// Función para mostrar notificaciones
+function mostrarNotificacion(mensaje, tipo = "info") {
+  // Crear elemento de notificación
+  const notificacion = document.createElement("div");
+  notificacion.className = `notification notification-${tipo}`;
+
+  const iconos = {
+    success: "✅",
+    error: "❌",
+    warning: "⚠️",
+    info: "ℹ️",
+  };
+
+  notificacion.innerHTML = `
+    <span class="notification-icon">${iconos[tipo] || iconos.info}</span>
+    <span class="notification-message">${mensaje}</span>
+  `;
+
+  // Agregar estilos si no existen
+  if (!document.getElementById("notification-styles")) {
+    const styles = document.createElement("style");
+    styles.id = "notification-styles";
+    styles.textContent = `
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 6px;
+        color: white;
+        font-weight: 500;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        animation: slideIn 0.3s ease;
+      }
+      
+      .notification-success { background: #27ae60; }
+      .notification-error { background: #e74c3c; }
+      .notification-warning { background: #f39c12; }
+      .notification-info { background: #3498db; }
+      
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(styles);
+  }
+
+  // Agregar al DOM
+  document.body.appendChild(notificacion);
+
+  // Auto-remover después de 4 segundos
+  setTimeout(() => {
+    notificacion.style.animation = "slideOut 0.3s ease";
+    setTimeout(() => {
+      if (notificacion.parentNode) {
+        notificacion.parentNode.removeChild(notificacion);
+      }
+    }, 300);
+  }, 4000);
+
+  console.log(`📢 Notificación (${tipo}): ${mensaje}`);
+}
+
+console.log("✅ Funciones de asignación de repartidores cargadas");
