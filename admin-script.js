@@ -683,22 +683,54 @@ function guardarRepartidor() {
   console.log("💾 Guardando repartidor...");
 
   try {
+    // Verificar que los elementos existen
+    const nombreEl = document.getElementById("repartidorNombre");
+    const apellidoEl = document.getElementById("repartidorApellido");
+    const telefonoEl = document.getElementById("repartidorTelefono");
+    const vehiculoEl = document.getElementById("repartidorVehiculo");
+    const placaEl = document.getElementById("repartidorPlaca");
+    const zonaEl = document.getElementById("repartidorZona");
+
+    console.log("🔍 Verificando elementos del formulario:", {
+      nombre: !!nombreEl,
+      apellido: !!apellidoEl,
+      telefono: !!telefonoEl,
+      vehiculo: !!vehiculoEl,
+      placa: !!placaEl,
+      zona: !!zonaEl,
+    });
+
+    if (!nombreEl || !apellidoEl || !telefonoEl || !vehiculoEl || !zonaEl) {
+      console.error("❌ Algunos elementos del formulario no se encontraron");
+      alert("Error: No se pueden obtener los datos del formulario");
+      return;
+    }
+
     // Obtener datos del formulario
-    const nombre = document.getElementById("repartidorNombre").value.trim();
-    const apellido = document.getElementById("repartidorApellido").value.trim();
-    const telefono = document.getElementById("repartidorTelefono").value.trim();
-    const vehiculo = document.getElementById("repartidorVehiculo").value;
-    const placa = document
-      .getElementById("repartidorPlaca")
-      .value.trim()
-      .toUpperCase();
-    const zona = document.getElementById("repartidorZona").value;
+    const nombre = nombreEl.value.trim();
+    const apellido = apellidoEl.value.trim();
+    const telefono = telefonoEl.value.trim();
+    const vehiculo = vehiculoEl.value;
+    const placa = placaEl ? placaEl.value.trim().toUpperCase() : "";
+    const zona = zonaEl.value;
+
+    console.log("📋 Datos del formulario:", {
+      nombre,
+      apellido,
+      telefono,
+      vehiculo,
+      placa,
+      zona,
+    });
 
     // Validaciones
     if (!nombre || !apellido || !telefono || !vehiculo || !zona) {
-      alert("Por favor completa todos los campos obligatorios");
+      console.warn("⚠️ Campos obligatorios faltantes");
+      alert("Por favor completa todos los campos obligatorios (*)");
       return;
     }
+
+    console.log("✅ Validaciones pasadas, creando repartidor...");
 
     // Crear objeto repartidor
     const nuevoRepartidor = {
@@ -736,25 +768,34 @@ function guardarRepartidor() {
       },
     };
 
+    console.log("👤 Nuevo repartidor creado:", nuevoRepartidor);
+
     // Agregar a la lista
     repartidoresData.push(nuevoRepartidor);
+    console.log(`📊 Total repartidores ahora: ${repartidoresData.length}`);
 
     // Guardar en localStorage
     localStorage.setItem("repartidoresData", JSON.stringify(repartidoresData));
+    console.log("💾 Datos guardados en localStorage");
 
     // Actualizar tabla
+    console.log("🔄 Actualizando tabla...");
     cargarTablaRepartidores();
 
     // Cerrar modal
+    console.log("🔴 Cerrando modal...");
     cerrarModalRepartidor();
 
     // Mostrar confirmación
-    alert(`Repartidor agregado exitosamente: ${nombre} ${apellido}`);
+    alert(
+      `✅ Repartidor agregado exitosamente:\n${nombre} ${apellido}\nZona: ${zona}\nVehículo: ${vehiculo}`
+    );
 
-    console.log(`✅ Repartidor agregado: ${nuevoRepartidor.id}`);
+    console.log(`🎉 Repartidor agregado exitosamente: ${nuevoRepartidor.id}`);
   } catch (error) {
     console.error("❌ Error guardando repartidor:", error);
-    alert("Error al guardar repartidor");
+    console.error("Stack trace:", error.stack);
+    alert(`Error al guardar repartidor: ${error.message}`);
   }
 }
 
