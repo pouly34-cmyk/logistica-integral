@@ -723,10 +723,41 @@ function guardarRepartidor() {
       zona,
     });
 
-    // Validaciones
-    if (!nombre || !apellido || !telefono || !vehiculo || !zona) {
-      console.warn("⚠️ Campos obligatorios faltantes");
-      alert("Por favor completa todos los campos obligatorios (*)");
+    // Validaciones detalladas
+    const camposFaltantes = [];
+
+    if (!nombre || nombre === "") {
+      camposFaltantes.push("Nombre");
+    }
+    if (!apellido || apellido === "") {
+      camposFaltantes.push("Apellido");
+    }
+    if (!telefono || telefono === "") {
+      camposFaltantes.push("Teléfono");
+    }
+    if (!vehiculo || vehiculo === "" || vehiculo === "Seleccionar vehículo") {
+      camposFaltantes.push("Tipo de Vehículo");
+    }
+    if (!zona || zona === "" || zona === "Seleccionar zona") {
+      camposFaltantes.push("Zona de Cobertura");
+    }
+
+    console.log("🔍 Validación de campos:", {
+      nombre: nombre || "VACÍO",
+      apellido: apellido || "VACÍO",
+      telefono: telefono || "VACÍO",
+      vehiculo: vehiculo || "VACÍO",
+      zona: zona || "VACÍO",
+      camposFaltantes: camposFaltantes,
+    });
+
+    if (camposFaltantes.length > 0) {
+      console.warn("⚠️ Campos obligatorios faltantes:", camposFaltantes);
+      alert(
+        `Por favor completa los siguientes campos obligatorios:\n\n• ${camposFaltantes.join(
+          "\n• "
+        )}`
+      );
       return;
     }
 
